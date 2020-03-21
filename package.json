@@ -5,11 +5,13 @@
   "main": "resource-checker.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "bundle": "cd puppeteer && npm run bundle"
+    "bundle": "cd puppeteer && npm run bundle",
+    "start": "node index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.17.1",
     "puppeteer": "^2.1.1"
   }
 }
