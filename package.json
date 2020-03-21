@@ -1,17 +1,20 @@
 {
-  "name": "resource-checker",
-  "version": "1.0.1",
-  "description": "",
-  "main": "resource-checker.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "bundle": "cd puppeteer && npm run bundle",
-    "start": "node index.js"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "express": "^4.17.1",
-    "puppeteer": "^2.1.1"
-  }
+	"name": "resource-checker",
+	"version": "1.0.1",
+	"description": "",
+	"main": "resource-checker.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"bundle": "cd puppeteer && npm run bundle",
+		"start": "node index.js"
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"express": "^4.17.1",
+		"puppeteer": "^2.1.1"
+	},
+	"puppeteer": {
+		"chromium_revision": "699988"
+	}
 }
