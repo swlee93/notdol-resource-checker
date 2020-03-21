@@ -10,8 +10,9 @@ const bodyParser = require('body-parser')
 const app = express()
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
+
 app.all('/*', function(request, response, next) {
-	response.header('Access-Control-Allow-Origin', '*')
+	response.header('Access-Control-Allow-Origin', 'http://dev.whatap.io:8080')
 
 	response.setHeader('Access-Control-Allow-Methods', 'POST, GET')
 	response.setHeader('Access-Control-Max-Age', '3600')
