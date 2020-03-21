@@ -2,7 +2,6 @@ const puppeteer = require('puppeteer')
 
 module.exports = function(url) {
 	return new Promise((resolve, reject) => {
-		console.info('executablePath: ', puppeteer.executablePath())
 		;(async () => {
 			const browser = await puppeteer.launch({
 				// headless: true, // debug only
