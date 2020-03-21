@@ -1,8 +1,8 @@
 const delay = (time) => new Promise((resolve, reject) => setTimeout(resolve, time))
 const puppeteer = require('puppeteer')
 const fs = require('fs')
-module.exports = function resourceChecker(actions) {
-	var testActions = {
+module.exports = function resourceChecker(query) {
+	let testActions = {
 		baseUrl: 'http://dev.whatap.io:8080',
 		actions: [
 			{ type: 'keyboard', target: '#id_email', input: 'sa@whatap.io' },
@@ -13,20 +13,23 @@ module.exports = function resourceChecker(actions) {
 	}
 
 	return new Promise((resolve, reject) => {
-		if (!actions) {
-			actions = testActions
-		}
 		try {
-			;(async (json) => {
-				var { baseUrl, actions } = json
+			;(async () => {
+				if (!query || (query && !query.baseUrl)) {
+					query = testActions
+				}
+
+				let { baseUrl, actions } = query
 
 				const browser = await puppeteer.launch({ args: ['--no-sandbox'] })
 				const page = await browser.newPage()
+
 				await page.goto(baseUrl)
 
-				var urls = {}
-				var reqCnt = 0
-				var to = undefined
+				let metrics = {}
+				let urls = {}
+				let reqCnt = 0
+				let to = undefined
 
 				function networkIdle(fn) {
 					if (reqCnt <= 0) {
@@ -40,7 +43,7 @@ module.exports = function resourceChecker(actions) {
 					}
 				}
 
-				for (var { type, target, until, input } of actions) {
+				for (let { type, target, until, input } of actions) {
 					switch (type) {
 						case 'keyboard':
 							await page.focus(target)
@@ -51,21 +54,26 @@ module.exports = function resourceChecker(actions) {
 							await page.setDefaultNavigationTimeout(0)
 							await page.setRequestInterception(true)
 							let reformatFirstRequest = true
-
+							await page.metrics().then((mtrx) => {
+								metrics = mtrx
+							})
 							page.on('request', (req) => {
-								var { _url } = req
-								urls[_url] = { stime: Date.now() }
+								let { _url, _resourceType } = req
+								// document, stylesheet, image, media, font, script, texttrack, xhr, fetch, eventsource, websocket, manifest, other
+								urls[_url] = { stime: Date.now(), resourceType: _resourceType }
 								reqCnt++
 								req.continue()
 							})
 
 							page.on('response', (res) => {
-								var { _url, _status } = res
-                console.log('resources: ', res)
+								let { _url, _status, _contentType } = res
+
 								if (urls[_url]) {
 									urls[_url].etime = Date.now()
 									urls[_url].duration = urls[_url].etime - urls[_url].stime
 									urls[_url].status = _status
+									urls[_url].contentType = _contentType
+
 									reqCnt--
 
 									networkIdle(async () => {
@@ -75,7 +83,7 @@ module.exports = function resourceChecker(actions) {
 										// await page.screenshot({ path: 'screenshot.png' })
 										await browser.close()
 
-										resolve(urls)
+										resolve({ metrics, urls })
 									})
 								}
 							})
@@ -88,9 +96,9 @@ module.exports = function resourceChecker(actions) {
 							break
 					}
 				}
-			})(actions)
+			})()
 		} catch (error) {
-			reject(error)
+			reject('failed')
 		}
 	})
 }
