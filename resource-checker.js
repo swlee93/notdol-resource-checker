@@ -61,7 +61,7 @@ module.exports = function resourceChecker(actions) {
 
 							page.on('response', (res) => {
 								var { _url, _status } = res
-
+                console.log('resources: ', res)
 								if (urls[_url]) {
 									urls[_url].etime = Date.now()
 									urls[_url].duration = urls[_url].etime - urls[_url].stime
