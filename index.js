@@ -3,17 +3,37 @@ const port = process.env.PORT || 3131
 const screenshot = require('./screenshot')
 const resources = require('./resource-checker')
 const bodyParser = require('body-parser')
+const cors = require('cors')
 
+const whitelist = [
+	'http://service.whatap.io',
+	'https://service.whatap.io',
+	'http://dev.whatap.io',
+	'https://dev.whatap.io',
+	'http://beta.whatap.io',
+	'https://beta.whatap.io',
+	'http://canary.whatap.io',
+	'https://canary.whatap.io',
+	'http://127.0.0.1',
+]
+const corsOptions = {
+	origin: function(origin, callback) {
+		if (origin && whitelist.find((wl) => origin.includes(wl))) {
+			callback(null, true)
+		} else {
+			callback(new Error('Not allowed by CORS'))
+		}
+	},
+}
 /**
  * @app
  */
 const app = express()
+
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
-app.all('/*', function(request, response, next) {
-	response.header('Access-Control-Allow-Origin', 'http://dev.whatap.io:8080')
-
+app.all('/*', cors(corsOptions), function(request, response, next) {
 	response.setHeader('Access-Control-Allow-Methods', 'POST, GET')
 	response.setHeader('Access-Control-Max-Age', '3600')
 	response.setHeader('Access-Control-Allow-Headers', 'Origin, Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With, X-Auth-Token')
@@ -46,22 +66,12 @@ app.get('/resources', (req, res) => {
 /**
  * @post
  */
-app.post('/resources', (req, res) => {
+app.post('/resources', async (req, res) => {
 	const query = req.body
-	tryCatch(
-		(async () => {
-			const json = await resources(query)
-			res.status(200).json(json)
-		})()
-	)
+	;(async () => {
+		const json = await resources(query)
+		res.status(200).json(json)
+	})()
 })
-
-function tryCatch(fetch) {
-	try {
-		fetch && fetch()
-	} catch (error) {
-		console.error(error)
-	}
-}
 
 app.listen(port, () => console.log(`app listening on port ${port}!`))
