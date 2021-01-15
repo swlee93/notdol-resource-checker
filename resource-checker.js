@@ -67,12 +67,14 @@ module.exports = function resourceChecker(query) {
 
 							page.on('response', (res) => {
 								let { _url, _status, _contentType } = res
-
+								let contentLength = res.headers()['content-length']
+								
 								if (urls[_url]) {
 									urls[_url].etime = Date.now()
 									urls[_url].duration = urls[_url].etime - urls[_url].stime
 									urls[_url].status = _status
 									urls[_url].contentType = _contentType
+									urls[_url].contentLength = contentLength
 
 									reqCnt--
 
